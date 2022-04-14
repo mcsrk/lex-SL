@@ -1,8 +1,12 @@
 import sys
-global col, row
-# lee toda la entrada y la guarda en programLines
+# lee toda la entrada y la guarda en programLines como una lista de listas
 inputProgram = sys.stdin.readlines()
-programLines = [line.rstrip() for line in inputProgram]
+programLines = []
+for line in inputProgram:
+    newLineAsList = list(line.strip(""))
+    newLineAsList.append("\n")
+    programLines.append(newLineAsList)
+
 operators = {"=": "tk_asignacion",
              ",": "tk_coma",
              "]": "tk_corchete_derecho",
@@ -43,6 +47,19 @@ subroutines = ["dim", "imprimir", "cls", "leer", "set_ifs", "abs",
 dataTypes = ["cadena", "logico", "numerico"]
 
 
+def error(r, c):
+    return ">>> Error lexico (linea: " + str(r) + ", posicion: " + str(c) + ")"
+
+
+def isOperator(token): return token in operators
+
+
+def isQuotes(token): return token == "\"" or token == "'"
+
+
+def isJumpline(c): return c == '\n'
+
+
 def isReservedWord(token):
 
     return (
@@ -65,44 +82,91 @@ def logStringOrId(id, val, r, c):
 
 
 def isItEmpty(val):
-    empties = [' ', '\n', '\t']
+    empties = [' ', '\n', '\t', '\r']
     return val in empties
 
 
 col, row = 0, 0
 token = ''
 comment = False
+moveForward = 0
 
 for line in programLines:
-    col = 1
+    col = 0
     row += 1
-    token = ''
-    # si no es una linea vacía
-    if comment:
-        continue
-    if not comment:
-        if(line):
-            # print("LINEA: ", line)
-            for col in range(len(line)):
-                if (not isItEmpty(line[col])):
-                    token += line[col]
-                else:
-                    token = ''
+    # si no es una linea vacía de esas que son señuelos
+    if(line):
+        for col in range(len(line)):
+            if moveForward != 0:
+                if moveForward > 0:
+                    moveForward -= 1
+                    continue
+
+            if comment:
+                if line[col] == "*" and line[col+1] == "/":
+                    moveForward += 1
+                    comment = False
+                    continue
+
+            if comment == False:
+
                 # es comentario
-                if(token == "/"):
+                if(line[col] == "/"):
                     if(line[col+1] == "/"):
                         break
-                # es string
-                # es operador
-                    # if(line[col] in operators):
-                    #     logKeywordOrOperator(operators[line[col]], row, col)
-                # es palabra reservada
+                    elif (line[col+1] == "*"):
+                        comment = True
+                        break
 
-                if (isReservedWord(token)):
-                    logKeywordOrOperator(token, row, col+2-len(token))
-                    token = ''
+                # es string
+                elif(isQuotes(line[col])):
+                    string = '"'
+                    stringPos = col+1
+                    while not isQuotes(line[1 + col]) and not isJumpline(line[1 + col]):
+                        if not isQuotes(line[1+col]):
+                            if not isJumpline(line[1 + col]):
+                                string = string + line[1 + col]
+                                moveForward += 1
+                                col += 1
+
+                    if isQuotes(line[1 + col]):
+                        string = string + line[1 + col]
+                        moveForward += 1
+                        logStringOrId("tk_cadena", string, row, stringPos)
+                    else:
+                        print(error(row, 1 + col))
+                        sys.exit()
+                # es operador
+                elif(isOperator(line[col])):
+                    # revisa el siguiente char para saber si es un op más largo
+                    if(col+1 < len(line)):
+                        op = line[col] + line[col+1]
+                        opPos = col
+                        if(isOperator(op)):
+                            moveForward += 1
+                            logKeywordOrOperator(operators[op], row, opPos)
+                        else:
+                            logKeywordOrOperator(
+                                operators[line[col]], row, col+1)
+
                 # es entero
                 # es decimal
-                # es id
+                # es alpha o _
+                elif (line[col] == "_" or line[col].isalpha()):
+                    idName = line[col]
+                    idPos = col+1
+                    # obtiene toda la continuidad de caracteres
+                    while(line[col+1].isalpha() or line[col+1] == "_" or line[col+1].isdigit()):
+                        idName += line[col+1]
+                        col += 1
+                        moveForward += 1
+                    # es palabra reservada
+                    if isReservedWord(idName):
+                        logKeywordOrOperator(idName, row, idPos)
+                    # es otra cosa
+                    else:
+                        logStringOrId('id', idName, row, idPos)
+                elif isItEmpty(line[col]):
+                    continue
             # print(f"{row} hay linea")
-        col = 0
+    col = 0
