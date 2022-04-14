@@ -71,33 +71,38 @@ def isItEmpty(val):
 
 col, row = 0, 0
 token = ''
+comment = False
+
 for line in programLines:
     col = 1
     row += 1
     token = ''
     # si no es una linea vacía
-    if(line):
-        # print("LINEA: ", line)
-        for col in range(len(line)):
-            if (not isItEmpty(line[col])):
-                token += line[col]
-            else:
-                token = ''
-            # es comentario
-            if(token == "/"):
-                if(line[col+1] == "/"):
-                    continue
-            # es string
-            # es operador
-                # if(line[col] in operators):
-                #     logKeywordOrOperator(operators[line[col]], row, col)
-            # es palabra reservada
+    if comment:
+        continue
+    if not comment:
+        if(line):
+            # print("LINEA: ", line)
+            for col in range(len(line)):
+                if (not isItEmpty(line[col])):
+                    token += line[col]
+                else:
+                    token = ''
+                # es comentario
+                if(token == "/"):
+                    if(line[col+1] == "/"):
+                        break
+                # es string
+                # es operador
+                    # if(line[col] in operators):
+                    #     logKeywordOrOperator(operators[line[col]], row, col)
+                # es palabra reservada
 
-            if (isReservedWord(token)):
-                logKeywordOrOperator(token, row, col+2-len(token))
-                token = ''
-            # es entero
-            # es decimal
-            # es id
-        # print(f"{row} hay linea")
-    col = 0
+                if (isReservedWord(token)):
+                    logKeywordOrOperator(token, row, col+2-len(token))
+                    token = ''
+                # es entero
+                # es decimal
+                # es id
+            # print(f"{row} hay linea")
+        col = 0
