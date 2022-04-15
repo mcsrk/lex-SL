@@ -82,8 +82,9 @@ def isItEmpty(val):
 
 
 col, row, moveForward, token, comment = 0, 0, 0, '', False
-
-for line in programLines:
+index = 0
+while index < len(programLines):
+    line = programLines[index]
     col = 0
     row += 1
     # si no es una linea vacía de esas que son señuelos
@@ -153,8 +154,8 @@ for line in programLines:
                     # obtiene toda la continuidad de caracteres
                     while(line[col+1].isalpha() or line[col+1] == "_" or line[col+1].isdigit()):
                         idName += line[col+1]
-                        col += 1
-                        moveForward += 1
+                        col, moveForward = col + 1, moveForward + 1
+
                     # verifica si es palabra reservada o si es otra cosa
                     logKeywordOrOperator(idName, row, idPos) if isReservedWord(
                         idName) else logStringOrId('id', idName, row, idPos)
@@ -162,4 +163,9 @@ for line in programLines:
                 elif isItEmpty(line[col]):
                     continue
             # print(f"{row} hay linea")
-    col = 0
+    index += 1
+
+# referencias:
+# Token Separation(Lexical Analyzer) using Python - https://www.youtube.com/watch?v=O4Bt_CyZWbI
+# Introducción al lenguaje SL https://drive.google.com/file/d/1tmsrQqpN85Z4kLvnNKFTfVdjMuqlq2Ga/view
+# Estructura de código con condicionales - https://drive.google.com/file/d/1PbuEg_gz2RGIrEAaJRyvO_bFcMRBIlRo/view y https://github.com/milderhc/pseint-code-analyzer
