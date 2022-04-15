@@ -60,13 +60,8 @@ def isQuotes(token): return token == "\"" or token == "'"
 def isJumpline(c): return c == '\n'
 
 
-def isReservedWord(token):
-
-    return (
-        token in keywords
-        or token in subroutines
-        or token in dataTypes
-    )
+def isReservedWord(token): return (
+    token in keywords or token in subroutines or token in dataTypes)
 
 
 def logKeywordOrOperator(tkName, r, c):
@@ -86,10 +81,7 @@ def isItEmpty(val):
     return val in empties
 
 
-col, row = 0, 0
-token = ''
-comment = False
-moveForward = 0
+col, row, moveForward, token, comment = 0, 0, 0, '', False
 
 for line in programLines:
     col = 0
@@ -119,53 +111,54 @@ for line in programLines:
                         break
 
                 # es string
+                    # si encuentra una "
                 elif(isQuotes(line[col])):
-                    string = '"'
-                    stringPos = col+1
+                    string, stringPos = '"', col+1
+                    # obtiene todos los chars antes de encontrar la sigueinte " o un \n
                     while not isQuotes(line[1 + col]) and not isJumpline(line[1 + col]):
                         if not isQuotes(line[1+col]):
                             if not isJumpline(line[1 + col]):
                                 string = string + line[1 + col]
                                 moveForward += 1
                                 col += 1
-
+                    # log cuando ecuentra una " de cierre
                     if isQuotes(line[1 + col]):
                         string = string + line[1 + col]
                         moveForward += 1
                         logStringOrId("tk_cadena", string, row, stringPos)
+                    # log de error si no encuentra una " de cierre
                     else:
                         print(error(row, 1 + col))
                         sys.exit()
                 # es operador
                 elif(isOperator(line[col])):
-                    # revisa el siguiente char para saber si es un op más largo
+                    # revisa el siguiente char para saber si es un op más largo (2 chars)
                     if(col+1 < len(line)):
-                        op = line[col] + line[col+1]
-                        opPos = col
+                        op, opPos = line[col] + line[col+1], col
                         if(isOperator(op)):
                             moveForward += 1
-                            logKeywordOrOperator(operators[op], row, opPos)
+                            tkName = operators[op]
+                            logKeywordOrOperator(tkName, row, opPos)
                         else:
-                            logKeywordOrOperator(
-                                operators[line[col]], row, col+1)
+                            tkName = operators[line[col]]
+
+                            logKeywordOrOperator(tkName, row, col+1)
 
                 # es entero
                 # es decimal
-                # es alpha o _
+                # es texto cualquiera
+                    # es alpha o _
                 elif (line[col] == "_" or line[col].isalpha()):
-                    idName = line[col]
-                    idPos = col+1
+                    idName, idPos = line[col], col+1
                     # obtiene toda la continuidad de caracteres
                     while(line[col+1].isalpha() or line[col+1] == "_" or line[col+1].isdigit()):
                         idName += line[col+1]
                         col += 1
                         moveForward += 1
-                    # es palabra reservada
-                    if isReservedWord(idName):
-                        logKeywordOrOperator(idName, row, idPos)
-                    # es otra cosa
-                    else:
-                        logStringOrId('id', idName, row, idPos)
+                    # verifica si es palabra reservada o si es otra cosa
+                    logKeywordOrOperator(idName, row, idPos) if isReservedWord(
+                        idName) else logStringOrId('id', idName, row, idPos)
+
                 elif isItEmpty(line[col]):
                     continue
             # print(f"{row} hay linea")
