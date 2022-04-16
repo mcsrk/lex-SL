@@ -113,6 +113,12 @@ while index < len(programLines):
                     elif (line[col+1] == "*"):
                         comment = True
                         break
+                    else:
+                        op, opPos = line[col], col
+                        if(isOperator(op)):
+                            moveForward += 1
+                            tkName = operators[op]
+                            logKeywordOrOperator(tkName, row, opPos+1)
 
                 # es string
                     # si encuentra una " o una '
