@@ -38,7 +38,7 @@ keywords = ["and", "archivo", "caso", "const",
             "paso", "subrutina", "programa", "ref",
             "registro", "repetir", "retorna", "si",
             "sino", "tipos", "var", "variables",
-            "vector"]
+            "vector", "TRUE", "FALSE", "SI"]
 subroutines = ["dim", "imprimir", "cls", "leer", "set_ifs", "abs",
                "arctan", "ascii", "cos", "dec", "eof", "exp", "get_ifs",
                "inc", "int", "log", "lower", "mem", "ord", "paramval",
@@ -129,7 +129,7 @@ while index < len(programLines):
                         logStringOrId("tk_cadena", string, row, stringPos)
                     # log de error si no encuentra una " de cierre
                     else:
-                        print(error(row, 1 + col))
+                        print(error(row, 1 + stringPos))
                         sys.exit()
                 # es operador
                 elif(isOperator(line[col])):
