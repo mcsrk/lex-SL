@@ -151,19 +151,16 @@ while index < len(programLines):
                     entero = line[col]
 
                     while line[col+1].isdigit():
-                        moveForward += 1
-                        entero += line[col+1]
-                        col += 1
+                        moveForward, entero, col = moveForward + \
+                            1, entero+line[col+1], col+1
 
                     if(line[col+1] == "."):
-                        floatPart = ""
-                        moveForward += 1
-                        col += 1
+                        floatPart, moveForward, col = "", moveForward+1, col+1
                         if line[col+1].isdigit():
                             while line[col+1].isdigit():
-                                floatPart += line[col+1]
-                                moveForward += 1
-                                col += 1
+                                floatPart, moveForward, col = floatPart + \
+                                    line[col+1], moveForward+1, col+1
+
                             logStringOrId("tk_numero", entero +
                                           "."+floatPart, row, enteroPos)
                         else:
