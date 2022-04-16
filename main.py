@@ -187,6 +187,7 @@ while index < len(programLines):
             # print(f"{row} hay linea")
     index += 1
 
+# Mi repo: https://github.com/mcsrk/lex-SL.git
 # referencias:
 # Token Separation(Lexical Analyzer) using Python - https://www.youtube.com/watch?v=O4Bt_CyZWbI
 # Introducción al lenguaje SL https://drive.google.com/file/d/1tmsrQqpN85Z4kLvnNKFTfVdjMuqlq2Ga/view
