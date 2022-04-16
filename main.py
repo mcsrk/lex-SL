@@ -45,10 +45,11 @@ subroutines = ["dim", "imprimir", "cls", "leer", "set_ifs", "abs",
                "pcount", "pos", "random", "sec", "set_stdin", "set_stdout",
                "sin", "sqrt", "str", "strdup", "strlen", "substr", "tan", "upper", "val"]
 dataTypes = ["cadena", "logico", "numerico"]
+invalidChars = ['&']
 
 
 def error(r, c):
-    return ">>> Error lexico (linea: " + str(r) + ", posicion: " + str(c) + ")"
+    return ">>> Error lexico(linea:" + str(r) + ",posicion:" + str(c) + ")"
 
 
 def isOperator(token): return token in operators
@@ -90,6 +91,7 @@ while index < len(programLines):
     # si no es una linea vacía de esas que son señuelos
     if(line):
         for col in range(len(line)):
+            # print("COL: ", col, "Forward: ", moveForward)
             # si ya se leyó el char anterior
             if moveForward != 0:
                 if moveForward > 0:
@@ -140,11 +142,11 @@ while index < len(programLines):
                         if(isOperator(op)):
                             moveForward += 1
                             tkName = operators[op]
-                            logKeywordOrOperator(tkName, row, opPos)
+                            logKeywordOrOperator(tkName, row, opPos+1)
                         else:
                             tkName = operators[line[col]]
 
-                            logKeywordOrOperator(tkName, row, col+1)
+                            logKeywordOrOperator(tkName, row, opPos+1)
 
                 # es un número
                 elif(line[col].isdigit()):
@@ -242,8 +244,13 @@ while index < len(programLines):
                     logKeywordOrOperator(idName, row, idPos) if isReservedWord(
                         idName) else logStringOrId('id', idName, row, idPos)
 
+                elif(line[col] in invalidChars):
+                    col += 1
+                    print(error(row, col))
+                    sys.exit()
                 elif isItEmpty(line[col]):
                     continue
+
             # print(f"{row} hay linea")
     index += 1
 
