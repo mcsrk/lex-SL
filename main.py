@@ -90,6 +90,7 @@ while index < len(programLines):
     # si no es una linea vacía de esas que son señuelos
     if(line):
         for col in range(len(line)):
+            # si ya se leyó el char anterior
             if moveForward != 0:
                 if moveForward > 0:
                     moveForward -= 1
@@ -112,18 +113,18 @@ while index < len(programLines):
                         break
 
                 # es string
-                    # si encuentra una " o una
+                    # si encuentra una " o una '
                 elif(isQuotes(line[col])):
                     string, stringPos = line[col], col+1
-                    # obtiene todos los chars antes de encontrar la sigueinte " o un \n
-                    while not isQuotes(line[1 + col]) and not isJumpline(line[1 + col]):
-                        if not isQuotes(line[1+col]):
+                    # obtiene todos los chars antes de encontrar las comillas de cierre o un \n
+                    while not line[1 + col] == string[0] and not isJumpline(line[1 + col]):
+                        if not line[1 + col] == string[0]:
                             if not isJumpline(line[1 + col]):
                                 string = string + line[1 + col]
                                 moveForward += 1
                                 col += 1
-                    # log cuando ecuentra una " de cierre
-                    if isQuotes(line[1 + col]):
+                    # log cuando ecuentra la comilla de cierre correspondinete
+                    if line[1 + col] == string[0]:
                         string = string + line[1 + col]
                         moveForward += 1
                         logStringOrId("tk_cadena", string, row, stringPos)
