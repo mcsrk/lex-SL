@@ -112,9 +112,9 @@ while index < len(programLines):
                         break
 
                 # es string
-                    # si encuentra una "
+                    # si encuentra una " o una
                 elif(isQuotes(line[col])):
-                    string, stringPos = '"', col+1
+                    string, stringPos = line[col], col+1
                     # obtiene todos los chars antes de encontrar la sigueinte " o un \n
                     while not isQuotes(line[1 + col]) and not isJumpline(line[1 + col]):
                         if not isQuotes(line[1+col]):
@@ -149,23 +149,82 @@ while index < len(programLines):
                 elif(line[col].isdigit()):
                     enteroPos = col + 1
                     entero = line[col]
+                    floatPart = ""
+                    powerPart = ""
 
                     while line[col+1].isdigit():
                         moveForward, entero, col = moveForward + \
                             1, entero+line[col+1], col+1
 
                     if(line[col+1] == "."):
-                        floatPart, moveForward, col = "", moveForward+1, col+1
+                        moveForward, col = moveForward+1, col+1
                         if line[col+1].isdigit():
                             while line[col+1].isdigit():
                                 floatPart, moveForward, col = floatPart + \
                                     line[col+1], moveForward+1, col+1
+                            # busca notacion cientifica
+                            if line[col+1] == "e" or line[col+1] == "E":
+                                exponent = line[col+1]
+                                moveForward += 1
+                                col += 1
+                                # busca exponentes sin signo y con float. i.e: 5.2e10
+                                if line[col+1].isdigit():
+                                    while line[col+1].isdigit():
+                                        powerPart += line[col+1]
+                                        col += 1
+                                        moveForward += 1
+                                    logStringOrId(
+                                        "tk_numero", entero + "."+floatPart+exponent+powerPart, row, enteroPos)
 
-                            logStringOrId("tk_numero", entero +
-                                          "."+floatPart, row, enteroPos)
+                                elif line[col+1] == "+" or line[col+1] == "-":
+                                    exponent += line[col+1]  # e+, e-, E+, E-
+                                    col += 1
+                                    moveForward += 1
+                                    if line[col+1].isdigit():
+                                        while line[col+1].isdigit():
+                                            powerPart += line[col+1]
+                                            col += 1
+                                            moveForward += 1
+                                        logStringOrId(
+                                            "tk_numero", entero + "."+floatPart+exponent+powerPart, row, enteroPos)
+                                    else:
+                                        error(row, col+1)
+                                else:
+                                    error(row, col+1)
+                            else:
+                                logStringOrId("tk_numero", entero +
+                                              "."+floatPart, row, enteroPos)
                         else:
                             error(row, col+1)
+                    elif line[col+1] == "e" or line[col+1] == "E":
+                        exponent = line[col+1]
+                        moveForward += 1
+                        col += 1
+                        # busca exponentes sin signo y sin float. i.e: 2e9
+                        if line[col+1].isdigit():
+                            while line[col+1].isdigit():
+                                powerPart += line[col+1]
+                                col += 1
+                                moveForward += 1
+                            logStringOrId(
+                                "tk_numero", entero + exponent+powerPart, row, enteroPos)
 
+                        elif line[col+1] == "+" or line[col+1] == "-":
+                            exponent += line[col+1]  # e+, e-, E+, E-
+                            col += 1
+                            moveForward += 1
+                            powerPart = ""
+                            if line[col+1].isdigit():
+                                while line[col+1].isdigit():
+                                    powerPart += line[col+1]
+                                    col += 1
+                                    moveForward += 1
+                                logStringOrId(
+                                    "tk_numero", entero + exponent+powerPart, row, enteroPos)
+                            else:
+                                error(row, col+1)
+                        else:
+                            error(row, col+1)
                     else:
                         logStringOrId("tk_numero", entero, row, enteroPos)
 
