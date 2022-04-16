@@ -38,7 +38,7 @@ keywords = ["and", "archivo", "caso", "const",
             "paso", "subrutina", "programa", "ref",
             "registro", "repetir", "retorna", "si",
             "sino", "tipos", "var", "variables",
-            "vector", "TRUE", "FALSE", "SI"]
+            "vector", "TRUE", "FALSE", "SI", "NO"]
 subroutines = ["dim", "imprimir", "cls", "leer", "set_ifs", "abs",
                "arctan", "ascii", "cos", "dec", "eof", "exp", "get_ifs",
                "inc", "int", "log", "lower", "mem", "ord", "paramval",
