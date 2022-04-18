@@ -45,7 +45,7 @@ subroutines = ["dim", "imprimir", "cls", "leer", "set_ifs", "abs",
                "pcount", "pos", "random", "sec", "set_stdin", "set_stdout",
                "sin", "sqrt", "str", "strdup", "strlen", "substr", "tan", "upper", "val"]
 dataTypes = ["cadena", "logico", "numerico", "alen"]
-invalidChars = ['&']
+invalidChars = ['&', '$']
 
 
 def error(r, c):
