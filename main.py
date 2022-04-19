@@ -44,7 +44,7 @@ subroutines = ["dim", "imprimir", "cls", "leer", "set_ifs", "abs",
                "inc", "int", "log", "lower", "mem", "ord", "paramval",
                "pcount", "pos", "random", "sec", "set_stdin", "set_stdout",
                "sin", "sqrt", "str", "strdup", "strlen", "substr", "tan", "upper", "val"]
-dataTypes = ["cadena", "logico", "numerico", "alen"]
+dataTypes = ["cadena", "logico", "numerico", "alen", "entero"]
 invalidChars = ['&', '$']
 
 
