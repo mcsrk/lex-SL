@@ -39,7 +39,7 @@ def readAndCleanGramm():
         print(f"{symbol}->{parsedGramm[symbol]}")
 
 
-def firstOf(rule):
+def firstsOfRule(rule):
     global gramm, parsedGramm, noTerminals, terminals,  firsts
 
     if len(rule) > 0:
@@ -53,16 +53,16 @@ def firstOf(rule):
         # recursive case for no-terminals
 
         # match with a not terminal
-        if rule[0] in list(parsedGramm.keys()):
+        if list(parsedGramm.keys()).count(rule[0]) > 0:
             tempResult = []
             rigthPartRule = parsedGramm[rule[0]]
             # call first on each rule of RHS
             # fetched (& take union)
             for ele in rigthPartRule:
-                firstList = firstOf(ele)
+                firstList = firstsOfRule(ele)
                 if type(firstList) is list:
-                    for firstEle in firstList:
-                        tempResult.append(firstEle)
+                    [tempResult.append(firstEle) for firstEle in firstList]
+
                 else:
                     tempResult.append(firstList)
 
@@ -73,8 +73,8 @@ def firstOf(rule):
                 newList = []
                 tempResult.remove('epsilon')
                 if len(rule) > 1:
-                    ruleBeyond = rule[1:]
-                    newAnsw = firstOf(ruleBeyond)
+                    croppedRule = rule[1:]
+                    newAnsw = firstsOfRule(croppedRule)
                     if newAnsw != None:
                         if type(newAnsw) is list:
                             newList = tempResult + newAnsw
@@ -87,42 +87,34 @@ def firstOf(rule):
                 return tempResult
 
 
-def follow(nt):
+def nextsOfRule(noTerminal):
     global ini_symbol, noTerminals, \
         terminals, parsedGramm, firsts, nexts
-    # for start symbol return $ (recursion base case)
 
-    solset = set()
-    if nt == ini_symbol:
-        # return '$'
-        solset.add('$')
+    nextsSoFar = set()
+    if noTerminal == ini_symbol:
+        nextsSoFar.add('$')
 
-    # check all occurrences
-    # solset - is result of computed 'follow' so far
-
-    # For input, check in all rules
-    for curNT in parsedGramm:
-        rhs = parsedGramm[curNT]
-        # go for all productions of NT
-        for subrule in rhs:
-            if nt in subrule:
+    # looking for noTerminal instances in every rule
+    for everyNoTerminalSymbol in parsedGramm:
+        rules = parsedGramm[everyNoTerminalSymbol]
+        for subrule in rules:
+            if noTerminal in subrule:
                 # call for all occurrences on
                 # - non-terminal in subrule
-                while nt in subrule:
-                    index_nt = subrule.index(nt)
+                while noTerminal in subrule:
+                    index_nt = subrule.index(noTerminal)
                     subrule = subrule[index_nt + 1:]
-                    # empty condition - call follow on LHS
                     if len(subrule) != 0:
-                        # compute first if symbols on
-                        # - RHS of target Non-Terminal exists
-                        res = firstOf(subrule)
-                        # if epsilon in result apply rule
+                        res = firstsOfRule(subrule)
+                        # if epsilon in res:
                         # - (A->aBX)- follow of -
                         # - follow(B)=(first(X)-{ep}) U follow(A)
-                        if '#' in res:
+                        isThereEpsilon = res.count('epsilon')
+                        if isThereEpsilon > 0:
+                            ansNew = nextsOfRule(everyNoTerminalSymbol)
                             newList = []
-                            res.remove('#')
-                            ansNew = follow(curNT)
+                            res.remove('epsilon')
                             if ansNew != None:
                                 if type(ansNew) is list:
                                     newList = res + ansNew
@@ -135,17 +127,18 @@ def follow(nt):
                         # when nothing in RHS, go circular
                         # - and take follow of LHS
                         # only if (NT in LHS)!=curNT
-                        if nt != curNT:
-                            res = follow(curNT)
+                        if everyNoTerminalSymbol != noTerminal:
+                            res = nextsOfRule(everyNoTerminalSymbol)
 
                     # add follow result in set form
                     if res is not None:
                         if type(res) is list:
-                            for g in res:
-                                solset.add(g)
+                            [nextsSoFar.add(everyNextLexem)
+                             for everyNextLexem in res]
+
                         else:
-                            solset.add(res)
-    return list(solset)
+                            nextsSoFar.add(res)
+    return list(nextsSoFar)
 
 
 def getFIRSTSets():
@@ -156,7 +149,7 @@ def getFIRSTSets():
     for symbol in list(parsedGramm.keys()):
         firstSet = set()
         for rule in parsedGramm.get(symbol):
-            firstOfRule = firstOf(rule)
+            firstOfRule = firstsOfRule(rule)
             if firstOfRule != None:
                 if type(firstOfRule) is list:
                     for ele in firstOfRule:
@@ -179,20 +172,20 @@ def getFIRSTSets():
 def getNEXTSets():
     global gramm, parsedGramm, noTerminals, terminals, firsts, nexts
 
-    for NT in parsedGramm:
-        solset = set()
-        sol = follow(NT)
-        if sol is not None:
-            for g in sol:
-                solset.add(g)
-        nexts[NT] = solset
+    for eachNoTerminal in parsedGramm:
+        nextsSet = set()
+        res = nextsOfRule(eachNoTerminal)
+        if res is not None:
+            for g in res:
+                nextsSet.add(g)
+        nexts[eachNoTerminal] = nextsSet
 
     print("\nSIGUIENTES DE: \n")
     key_list = list(nexts.keys())
     index = 0
-    for gg in nexts:
+    for eachSymbol in nexts:
         print(f"SIGUIENTES({key_list[index]})"
-              f" => {nexts[gg]}")
+              f" => {nexts[eachSymbol]}")
         index += 1
 
 
