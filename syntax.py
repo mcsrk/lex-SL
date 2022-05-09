@@ -110,23 +110,21 @@ def nextsOfRule(noTerminal):
                         # if epsilon in res:
                         # - (A->aBX)- follow of -
                         # - follow(B)=(first(X)-{ep}) U follow(A)
-                        isThereEpsilon = res.count('epsilon')
-                        if isThereEpsilon > 0:
+                        isThereEpsilon = res.count('epsilon') > 0
+                        if isThereEpsilon:
                             ansNew = nextsOfRule(everyNoTerminalSymbol)
                             newList = []
                             res.remove('epsilon')
+
+                            newList = res
                             if ansNew != None:
                                 if type(ansNew) is list:
-                                    newList = res + ansNew
+                                    newList += ansNew
                                 else:
-                                    newList = res + [ansNew]
-                            else:
-                                newList = res
+                                    newList += [ansNew]
                             res = newList
                     else:
-                        # when nothing in RHS, go circular
-                        # - and take follow of LHS
-                        # only if (NT in LHS)!=curNT
+                        # when nothing in RHS, go circular and take follow of LHS only if (NT in LHS)!=curNT
                         if everyNoTerminalSymbol != noTerminal:
                             res = nextsOfRule(everyNoTerminalSymbol)
 
@@ -135,7 +133,6 @@ def nextsOfRule(noTerminal):
                         if type(res) is list:
                             [nextsSoFar.add(everyNextLexem)
                              for everyNextLexem in res]
-
                         else:
                             nextsSoFar.add(res)
     return list(nextsSoFar)
