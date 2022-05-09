@@ -1,6 +1,4 @@
-
-
-gramm = {
+gramm1 = {
     "EXPR": ["TERMINO-EXPR1"],
     "EXPR1": ["OP-TERMINO-EXPR1",
               "epsilon"],
@@ -11,13 +9,20 @@ gramm = {
            "tk_suma"],
     "FACTOR": ["numero"],
 }
-gramm1 = {
+gramm2 = {
     "A": ["B-C",
           "ant-A-all"],
     "B": ["big-C",
           "bus-A-boss",
           "epsilon"],
     "C": ["cat", "cow"],
+}
+gramm = {
+    "PROG": ["<tk_llaveizq>-STMTS-<tk_llavder>"],
+    "STMTS": ["STMT-STMTS", "epsilon", "<id>-<tk_asig>-EXPR-<tk_puntoycoma>", "<if>-<tk_parizq>-EXPR-<tk_parder>-STMT"],
+    "STMT": ["<id>-<tk_asig>-EXPR-<tk_puntoycoma>", "<if>-<tk_parizq>-EXPR-<tk_parder>-STMT"],
+    "EXPR": ["<id>-ETAIL"],
+    "ETAIL": ["<tk_mas>-EXPR", "<tk_menos>-EXPR", "epsilon"],
 }
 
 
@@ -103,10 +108,12 @@ def nextsOfRule(noTerminal):
                 # call for all occurrences on
                 # - non-terminal in subrule
                 while noTerminal in subrule:
+                    print(noTerminal)
                     index_nt = subrule.index(noTerminal)
                     subrule = subrule[index_nt + 1:]
                     if len(subrule) != 0:
                         res = firstsOfRule(subrule)
+                        print("res: ", res)
                         # if epsilon in res:
                         # - (A->aBX)- follow of -
                         # - follow(B)=(first(X)-{ep}) U follow(A)
@@ -125,6 +132,8 @@ def nextsOfRule(noTerminal):
                             res = newList
                     else:
                         # when nothing in RHS, go circular and take follow of LHS only if (NT in LHS)!=curNT
+                        print("subrule == 0")
+
                         if everyNoTerminalSymbol != noTerminal:
                             res = nextsOfRule(everyNoTerminalSymbol)
 
@@ -135,6 +144,7 @@ def nextsOfRule(noTerminal):
                              for everyNextLexem in res]
                         else:
                             nextsSoFar.add(res)
+
     return list(nextsSoFar)
 
 
@@ -186,6 +196,54 @@ def getNEXTSets():
         index += 1
 
 
+def predOfRule(leftPartSymbol, ruleSymbols):
+    global noTerminals, terminals, firsts, nexts, preds
+    tempPredSet = set()
+
+    if ruleSymbols[0] in terminals:
+        tempPredSet.add(ruleSymbols[0])
+        return list(tempPredSet)
+    elif ruleSymbols[0] in noTerminals:
+        tempPredSet = set.union(tempPredSet, firsts[ruleSymbols[0]])
+        if("epsilon" in tempPredSet):
+            if not ruleSymbols[1:]:
+                tempPredSet.remove("epsilon")
+                return list(tempPredSet)
+            else:
+                resSet = set(predOfRule(leftPartSymbol, ruleSymbols[1:]))
+                union = set.union(resSet, tempPredSet)
+                union.remove("epsilon")
+                finalUnion = set.union(union, nexts[ruleSymbols[0]])
+                return list(finalUnion)
+        else:
+            return list(tempPredSet)
+    elif ruleSymbols[0] == "epsilon":
+        tempPredSet = set.union(tempPredSet, nexts[leftPartSymbol])
+        return list(tempPredSet)
+    else:
+        print("wait, what??")
+
+
+def getPREDSSets():
+    global gramm, parsedGramm, noTerminals, terminals, firsts, nexts, preds
+    for eachNoTerminal in parsedGramm:
+        rules = parsedGramm[eachNoTerminal]
+        predSetsForRules = []
+        for i, everyRule in enumerate(rules):
+            res = predOfRule(eachNoTerminal, everyRule)
+            predSetsForRules.append(res)
+        preds[eachNoTerminal] = predSetsForRules
+
+    print("\nCONJUNTOS DE PREDICCIÓN: \n")
+    key_list = list(preds.keys())
+    index = 0
+    for eachSymbol in preds:
+        for eachPredOfRule in preds[eachSymbol]:
+            print(f"PRED({key_list[index]})"
+                  f" : {eachPredOfRule}")
+        index += 1
+
+
 def setImportantValues():
     global gramm, noTerminals, ini_symbol
 
@@ -196,24 +254,38 @@ def setImportantValues():
 
 
 noTerminals = []
-terminals = [
+terminals1 = [
     "tk_resta",
     "tk_suma", "numero"]
-terminals1 = ["ant",
+terminals2 = ["ant",
               "all",
               "big",
               "bus",
               "boss",
               "cat",
               "cow"]
+terminals = [
+    "<tk_llaveizq>",
+    "<tk_llavder>",
+    "<id>",
+    "<tk_asig>",
+    "<tk_puntoycoma>",
+    "<if>",
+    "<tk_parizq>",
+    "<tk_parder>",
+    "<tk_mas>",
+    "<tk_menos>",
+]
 parsedGramm = {}
 ini_symbol = ""
 firsts = {}
 nexts = {}
+preds = {}
 
 setImportantValues()
 getFIRSTSets()
 getNEXTSets()
+getPREDSSets()
 
 
 # Referencias
